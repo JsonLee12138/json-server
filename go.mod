@@ -1,4 +1,4 @@
-module json-server
+module github.com/JsonLee12138/json-server
 
 go 1.23
 

@@ -1,8 +1,8 @@
 package controller
 
 import (
+	"github.com/JsonLee12138/json-server/internal/apps/example/service"
 	"go.uber.org/dig"
-	"json-server/internal/apps/example/service"
 )
 
 func ControllerSetup(container *dig.Container) error {

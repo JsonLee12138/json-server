@@ -1,8 +1,8 @@
 package controller
 
 import (
+	"github.com/JsonLee12138/json-server/internal/apps/example/service"
 	"github.com/gofiber/fiber/v2"
-	"json-server/internal/apps/example/service"
 )
 
 type ExampleController struct {

@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/JsonLee12138/json-server/core"
 	"github.com/spf13/cobra"
-	"json-server/core"
 )
 
 func EnvSetup(cmd *cobra.Command) {

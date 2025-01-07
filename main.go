@@ -1,7 +1,7 @@
 package main
 
 import (
-	"json-server/cmd"
+	"github.com/JsonLee12138/json-server/cmd"
 )
 
 func main() {

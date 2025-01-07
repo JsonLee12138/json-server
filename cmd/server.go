@@ -2,12 +2,12 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/JsonLee12138/json-server/core"
+	"github.com/JsonLee12138/json-server/internal/apps/example/controller"
+	"github.com/JsonLee12138/json-server/internal/global"
 	"github.com/gofiber/fiber/v2"
 	"github.com/spf13/cobra"
 	"go.uber.org/dig"
-	"json-server/core"
-	"json-server/internal/apps/example/controller"
-	"json-server/internal/global"
 	"time"
 )
 

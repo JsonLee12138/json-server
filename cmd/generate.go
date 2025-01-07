@@ -1,11 +1,10 @@
 package cmd
 
 import (
-	//"embed"
 	"fmt"
+	"github.com/JsonLee12138/json-server/core"
+	"github.com/JsonLee12138/json-server/embed"
 	"github.com/spf13/cobra"
-	"json-server/core"
-	"json-server/embed"
 	"os"
 	"path"
 )
