@@ -1,0 +1,13 @@
+package {{ .ModuleName }}
+
+import (
+	"{{ .PkgPath }}/controller"
+	"{{ .PkgPath }}/service"
+	"go.uber.org/dig"
+)
+
+// Register{{ .ModuleName }}Module 在 DI 容器中注册 {{ .ModuleName }} 模块
+func {{ .SupperModuleName }}ModuleSetup(container *dig.Container) {
+	container.Provide(service.New{{ .ModuleName }}Service)
+	container.Provide(controller.New{{ .ModuleName }}Controller)
+}

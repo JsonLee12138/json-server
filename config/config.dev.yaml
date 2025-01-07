@@ -1,0 +1,38 @@
+logger:
+  director: ./logs
+  log-in-terminal: true
+  show-line-number: true
+system:
+  routes-print-able: true
+i18n:
+  default-lng: zh-CN
+  lngs:
+    - zh-CN
+  path: ./locales
+cors:
+  allow-methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+  allow-headers:
+    - Content-Type
+    - Authorization
+  allow-credentials: true
+  max-age: 12h
+  allow-origins:
+    - "*"
+mysql:
+  host: 43.156.11.252
+  port: 3306
+  username: root
+  password: ljs.1017
+  db-name: json_server
+  default-string-size: 191
+  dont-support-rename-column: true
+  dont-support-rename-index: true
+redis:
+  host: 43.156.11.252
+  port: 6379
+  password: ljs.1017
+  db: 0
