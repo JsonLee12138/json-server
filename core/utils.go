@@ -29,7 +29,13 @@ func GetModuleFullPath(module string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	actualPath := strings.Split(currentDir, moduleName)[1]
+	pathArr := strings.Split(currentDir, moduleName)
+	var actualPath string
+	if len(pathArr) < 2 {
+		actualPath = ""
+	} else {
+		actualPath = pathArr[1]
+	}
 	res := moduleName
 	if actualPath != "" {
 		if strings.HasPrefix(actualPath, "/") {
