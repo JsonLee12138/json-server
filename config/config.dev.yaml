@@ -22,17 +22,3 @@ cors:
   max-age: 12h
   allow-origins:
     - "*"
-mysql:
-  host: 43.156.11.252
-  port: 3306
-  username: root
-  password: ljs.1017
-  db-name: json_server
-  default-string-size: 191
-  dont-support-rename-column: true
-  dont-support-rename-index: true
-redis:
-  host: 43.156.11.252
-  port: 6379
-  password: ljs.1017
-  db: 0

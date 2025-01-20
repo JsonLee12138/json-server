@@ -1,0 +1,19 @@
+package controller
+
+import (
+	"{{ .PkgPath }}/service"
+)
+
+type {{ .Name }}Controller struct {
+    service *service.{{ .Name }}Service
+}
+
+type {{ .Name }}ControllerDeps struct {
+	Service *service.{{ .Name }}Service
+}
+
+func New{{ .Name }}Controller(deps {{ .Name }}ControllerDeps) *{{.Name }}Controller {
+	return &{{ .Name }}Controller{
+	    service: deps.Service,
+	}
+}

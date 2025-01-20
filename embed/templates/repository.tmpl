@@ -1,0 +1,19 @@
+package repository
+
+import (
+    "gorm.io/gorm"
+)
+
+type {{ .Name }}Repository struct {
+    db *gorm.DB
+}
+
+type {{ .Name }}RepositoryDeps struct {
+    DB *gorm.DB
+}
+
+func New{{.Name }}Repository(deps {{.Name }}RepositoryDeps) *{{.Name }}Repository {
+    return &{{.Name }}Repository{
+        db: deps.DB,
+    }
+}

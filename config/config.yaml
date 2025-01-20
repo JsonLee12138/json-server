@@ -32,16 +32,16 @@ cors:
   allow-origins:
     - "*"
 mysql:
-  host: 192.168.1.2
+  host: ""
   port: 3306
   username: root
-  password: ljs.1017
-  db-name: json_server
+  password: ""
+  db-name: ""
   default-string-size: 191
   dont-support-rename-column: true
   dont-support-rename-index: true
 redis:
-  host: 192.168.1.2
+  host: ""
   port: 6379
-  password: ljs.1017
+  password: ""
   db: 0

@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/JsonLee12138/json-server/core"
+	"github.com/JsonLee12138/json-server/internal/apps/example"
 	"github.com/JsonLee12138/json-server/internal/apps/example/controller"
 	"github.com/JsonLee12138/json-server/internal/global"
 	"github.com/gofiber/fiber/v2"
@@ -20,13 +21,13 @@ var ServerCmd = &cobra.Command{
 	Use:   "server",
 	Short: "A flexible Go configuration management tool",
 	Run: func(cmd *cobra.Command, args []string) {
+		EnvSetup(cmd)
 		runApp()
 	},
 }
 
 // 初始化 CLI 标志
 func init() {
-	EnvSetup(ServerCmd)
 	ServerCmd.PersistentFlags().BoolVar(&watchable, "watch", false, "Enable config file watching")
 }
 
@@ -49,7 +50,7 @@ func runApp() {
 		}
 	}
 	container := dig.New()
-	controller.ControllerSetup(container)
+	example.ExampleModuleSetup(container)
 	app := fiber.New(fiber.Config{
 		AppName:                  global.Config.System.AppName,
 		DisableStartupMessage:    core.Mode() == core.ProMode,
@@ -60,8 +61,9 @@ func runApp() {
 		ReadTimeout:              30 * time.Second,
 		WriteTimeout:             30 * time.Second,
 	})
+	// TODO: 路由目前是错误的, 后面也不需要改, 直接重构成使用注解来处理
 	container.Invoke(func(ctrl *controller.ExampleController) {
-		app.Get("/", ctrl.Hello)
+		app.Get("/", ctrl.Health)
 	})
 	if err := app.Listen(fmt.Sprintf(":%s", global.Config.System.Port)); err != nil {
 		panic(err)

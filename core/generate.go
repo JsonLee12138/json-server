@@ -33,7 +33,7 @@ func generate(tmpl *template.Template, outPath string, params map[string]string)
 		return err
 	}
 	defer f.Close()
-	
+
 	err = tmpl.Execute(f, params)
 	if err != nil {
 		return err
