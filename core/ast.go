@@ -132,13 +132,6 @@ func WriteToFileByFset(fset *token.FileSet, file *ast.File, filePath string) err
 	}, DefaultErrorHandler)
 }
 func CreateFunction(file *ast.File, name string, content *ast.BlockStmt) {
-	//file := ast.File{
-	//	Name:  ast.NewIdent("entry"),
-	//	Decls: []ast.Decl{},
-	//	Imports: []*ast.ImportSpec{
-	//		{},
-	//	},
-	//}
 	funcName := ast.NewIdent(name)
 	params := &ast.FieldList{
 		List: []*ast.Field{

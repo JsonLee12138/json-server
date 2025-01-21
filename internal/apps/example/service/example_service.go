@@ -12,9 +12,15 @@ type ExampleServiceDeps struct {
 	Repository *repository.ExampleRepository
 }
 
-func NewExampleService(deps ExampleServiceDeps) *ExampleService {
+//func NewExampleService(deps ExampleServiceDeps) *ExampleService {
+//	return &ExampleService{
+//		repository: deps.Repository,
+//	}
+//}
+
+func NewExampleService(r *repository.ExampleRepository) *ExampleService {
 	return &ExampleService{
-		repository: deps.Repository,
+		repository: r,
 	}
 }
 

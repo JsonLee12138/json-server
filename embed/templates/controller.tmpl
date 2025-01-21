@@ -8,12 +8,8 @@ type {{ .Name }}Controller struct {
     service *service.{{ .Name }}Service
 }
 
-type {{ .Name }}ControllerDeps struct {
-	Service *service.{{ .Name }}Service
-}
-
-func New{{ .Name }}Controller(deps {{ .Name }}ControllerDeps) *{{.Name }}Controller {
+func New{{ .Name }}Controller(service *service.{{ .Name }}Service) *{{.Name }}Controller {
 	return &{{ .Name }}Controller{
-	    service: deps.Service,
+	    service,
 	}
 }

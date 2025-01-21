@@ -8,12 +8,8 @@ type {{ .Name }}Service struct {
     repository *repository.{{.Name }}Repository
 }
 
-type {{ .Name }}ServiceDeps struct {
-	Repository *repository.{{.Name }}Repository
-}
-
-func New{{ .Name }}Service(deps {{ .Name }}ServiceDeps) *{{.Name }}Service {
+func New{{ .Name }}Service(repository *repository.{{ .Name }}Repository) *{{.Name }}Service {
 	return &{{ .Name }}Service{
-	    repository: deps.Repository,
+	    repository,
 	}
 }

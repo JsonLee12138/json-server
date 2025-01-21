@@ -12,8 +12,8 @@ type ExampleRepositoryDeps struct {
 	DB *gorm.DB
 }
 
-func NewExampleRepository(deps ExampleRepositoryDeps) *ExampleRepository {
+func NewExampleRepository() *ExampleRepository {
 	return &ExampleRepository{
-		db: deps.DB,
+		//db: deps.DB,
 	}
 }
