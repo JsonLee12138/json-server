@@ -32,10 +32,8 @@ func runApp(mainCmd *cobra.Command) {
 	watchable := core.Raise(mainCmd.Flags().GetBool("watch"))
 	var cmd *exec.Cmd
 	if watchable {
-		// TODO: 监听配置文件变化
 		cmd = exec.Command("air")
 	} else {
-		// TODO: 不监听配置文件变化
 		cmd = exec.Command("go", "run", "main.go")
 	}
 	cmd.Dir = "."
