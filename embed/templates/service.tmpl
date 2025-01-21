@@ -13,3 +13,7 @@ func New{{ .Name }}Service(repository *repository.{{ .Name }}Repository) *{{.Nam
 	    repository,
 	}
 }
+
+func (service *{{ .Name }}Service) HelloWord() string {
+	return "Hello Word!"
+}

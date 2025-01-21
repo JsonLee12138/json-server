@@ -2,7 +2,7 @@ package core
 
 import (
 	"fmt"
-	"github.com/JsonLee12138/json-server/internal/global"
+	"github.com/JsonLee12138/json-server/global"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
 	"time"
@@ -28,6 +28,5 @@ func NewApp() *fiber.App {
 }
 
 func StartApp(app *fiber.App) {
-	fmt.Println(global.Config.System.Port, "port")
 	RaiseVoid(app.Listen(fmt.Sprintf(":%s", global.Config.System.Port)))
 }

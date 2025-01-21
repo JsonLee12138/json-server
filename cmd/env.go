@@ -14,3 +14,8 @@ func EnvSetup(cmd *cobra.Command) {
 		fmt.Printf("✅ Server is running in the %s environment\n", core.Mode())
 	})
 }
+
+func ModeEnvHandler(e string) {
+	core.SetMode(core.ParseEnv(e))
+	fmt.Printf("✅ Server is running in the %s environment\n", core.Mode())
+}

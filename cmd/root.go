@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 // RootCmd 定义 CLI 的根命令
@@ -12,12 +13,13 @@ var RootCmd = &cobra.Command{
 }
 
 func init() {
+	RootCmd.AddCommand(ServerCmd, GenerateCmd)
 }
 
 // Execute 入口，加载所有命令
 func Execute() {
-	RootCmd.AddCommand(ServerCmd, GenerateCmd)
 	if err := RootCmd.Execute(); err != nil {
 		fmt.Printf("❌ CLI Error: %v\n", err)
+		os.Exit(1)
 	}
 }

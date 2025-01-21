@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"github.com/gofiber/fiber/v2"
 	"{{ .PkgPath }}/service"
 )
 
@@ -12,4 +13,8 @@ func New{{ .Name }}Controller(service *service.{{ .Name }}Service) *{{.Name }}Co
 	return &{{ .Name }}Controller{
 	    service,
 	}
+}
+
+func (c *{{ .Name }}Controller) HelloWord(ctx *fiber.Ctx) error {
+	return ctx.SendString(c.service.HelloWord())
 }
