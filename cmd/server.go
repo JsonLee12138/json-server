@@ -16,14 +16,14 @@ var ServerCmd = &cobra.Command{
 	Use:   "server",
 	Short: "A flexible Go configuration management tool",
 	Run: func(cmd *cobra.Command, args []string) {
-		EnvSetup(cmd)
+		//EnvSetup(cmd)
 		runApp(cmd)
 	},
 }
 
 // 初始化 CLI 标志
 func init() {
-	// ServerCmd.PersistentFlags().BoolVar(&watchable, "watch", false, "Enable config file watching")
+	EnvSetup(ServerCmd)
 	ServerCmd.PersistentFlags().BoolP("watch", "w", false, "Enable config file watching")
 }
 
