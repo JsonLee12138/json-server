@@ -48,5 +48,5 @@ func Mode() ENV_MODE {
 }
 
 func SetMode(mode ENV_MODE) {
-	currentEnv = mode
+	os.Setenv(ENV_MODE_KEY, string(mode))
 }

@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/JsonLee12138/json-server/core"
-	"github.com/JsonLee12138/json-server/core/generate"
+	generate2 "github.com/JsonLee12138/json-server/pkg/core/generate"
+	"github.com/JsonLee12138/json-server/pkg/utils"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -25,20 +25,20 @@ func GenerateSetup(cmd *cobra.Command) {
 		currentPath, _ := os.Getwd()
 		if moduleName != "" {
 			modulePath := fmt.Sprintf("%s/%s", currentPath, moduleName)
-			core.RaiseVoid(generate.GenerateModule(moduleName, modulePath))
+			utils.RaiseVoid(generate2.GenerateModule(moduleName, modulePath))
 			os.Exit(0)
 		}
 		if serviceName != "" {
-			core.RaiseVoid(generate.GenerateInjectService(serviceName, fmt.Sprintf("%s", currentPath), override, ""))
+			utils.RaiseVoid(generate2.GenerateInjectService(serviceName, fmt.Sprintf("%s", currentPath), override, ""))
 		}
 		if controllerName != "" {
-			core.RaiseVoid(generate.GenerateInjectController(controllerName, fmt.Sprintf("%s", currentPath), override, ""))
+			utils.RaiseVoid(generate2.GenerateInjectController(controllerName, fmt.Sprintf("%s", currentPath), override, ""))
 		}
 		if repositoryName != "" {
-			core.RaiseVoid(generate.GenerateInjectRepository(repositoryName, fmt.Sprintf("%s", currentPath), override))
+			utils.RaiseVoid(generate2.GenerateInjectRepository(repositoryName, fmt.Sprintf("%s", currentPath), override))
 		}
 		if entityName != "" {
-			core.RaiseVoid(generate.GenerateEntity(entityName, fmt.Sprintf("%s", currentPath), override))
+			utils.RaiseVoid(generate2.GenerateEntity(entityName, fmt.Sprintf("%s", currentPath), override))
 		}
 		if moduleName == "" && serviceName == "" && controllerName == "" && repositoryName == "" && entityName == "" {
 			cmd.Println("❌ Please specify a module, service, controller, repository, or entity name using -m or --module, -s or --service, -c or --controller, -r or --repository, or -e or --entity.")

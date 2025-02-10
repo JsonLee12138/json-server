@@ -2,48 +2,48 @@ package generate
 
 import (
 	"fmt"
-	"github.com/JsonLee12138/json-server/core"
 	"github.com/JsonLee12138/json-server/embed"
+	"github.com/JsonLee12138/json-server/pkg/utils"
 	"go/ast"
 	"go/token"
 	"strings"
 )
 
 func GenerateService(serviceName, output string, override bool, moduleName string) error {
-	return core.TryCatchVoid(func() {
-		tmplFile := string(core.Raise(embed.TemplatesPath.ReadFile("templates/service.tmpl")))
+	return utils.TryCatchVoid(func() {
+		tmplFile := string(utils.Raise(embed.TemplatesPath.ReadFile("templates/service.tmpl")))
 		outputPath := fmt.Sprintf("%s/service/%s_service.go", output, serviceName)
-		upperName := core.UpperCamelCase(serviceName)
-		pkgPath := core.Raise(core.GetModuleFullPath(moduleName))
+		upperName := utils.UpperCamelCase(serviceName)
+		pkgPath := utils.Raise(utils.GetModuleFullPath(moduleName))
 		params := map[string]string{
 			"Name":    upperName,
 			"PkgPath": pkgPath,
 		}
-		core.RaiseVoid(GenerateFileExistsHandler(outputPath, tmplFile, params, override))
+		utils.RaiseVoid(GenerateFileExistsHandler(outputPath, tmplFile, params, override))
 		fmt.Printf("✅ '%s' service has been successfully generated!\n", serviceName)
-	}, core.DefaultErrorHandler)
+	}, utils.DefaultErrorHandler)
 }
 
 func InjectService(serviceName, output string) error {
-	return core.TryCatchVoid(func() {
+	return utils.TryCatchVoid(func() {
 		entryPath := fmt.Sprintf("%s/entry.go", output)
-		isDir, exists, err := core.Exists(entryPath)
+		isDir, exists, err := utils.Exists(entryPath)
 		if err != nil {
-			core.Throw(err)
+			utils.Throw(err)
 		}
 		if !exists || isDir {
 			//core.RaiseVoid(core.OnlyCreateFile(entryPath))
-			core.RaiseVoid(GenerateEntry(output))
+			utils.RaiseVoid(GenerateEntry(output))
 		}
-		file, _, err := core.ParseFile(entryPath)
+		file, _, err := utils.ParseFile(entryPath)
 		if err != nil {
-			core.Throw(err)
+			utils.Throw(err)
 		}
 		pathArr := strings.Split(output, "/")
 		moduleName := pathArr[len(pathArr)-1]
-		upperModuleName := core.UpperCamelCase(moduleName)
-		upperServiceName := core.UpperCamelCase(serviceName)
-		funs := core.Raise(core.FindFunctions(file, ".*ModuleSetup$", core.RegexMatch))
+		upperModuleName := utils.UpperCamelCase(moduleName)
+		upperServiceName := utils.UpperCamelCase(serviceName)
+		funs := utils.Raise(utils.FindFunctions(file, ".*ModuleSetup$", utils.RegexMatch))
 		content := &ast.BlockStmt{
 			List: []ast.Stmt{
 				&ast.ExprStmt{
@@ -89,19 +89,19 @@ func InjectService(serviceName, output string) error {
 					},
 				},
 			}
-			core.CreateFunc(file, fmt.Sprintf("%sModuleSetup", upperModuleName), params, content)
+			utils.CreateFunc(file, fmt.Sprintf("%sModuleSetup", upperModuleName), params, content)
 		} else {
 			fn := funs[0].Node.(*ast.FuncDecl)
 			fn.Body.List = append(fn.Body.List, content.List...)
 		}
-		core.RaiseVoid(core.WriteToFile(file, entryPath))
+		utils.RaiseVoid(utils.WriteToFile(file, entryPath))
 		fmt.Printf("✅ '%s' service has been successfully injected!\n", serviceName)
-	}, core.DefaultErrorHandler)
+	}, utils.DefaultErrorHandler)
 }
 
 func GenerateInjectService(serviceName, output string, override bool, moduleName string) error {
-	return core.TryCatchVoid(func() {
-		core.RaiseVoid(GenerateService(serviceName, output, override, moduleName))
-		core.RaiseVoid(InjectService(serviceName, output))
-	}, core.DefaultErrorHandler)
+	return utils.TryCatchVoid(func() {
+		utils.RaiseVoid(GenerateService(serviceName, output, override, moduleName))
+		utils.RaiseVoid(InjectService(serviceName, output))
+	}, utils.DefaultErrorHandler)
 }

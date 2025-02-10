@@ -2,9 +2,11 @@ package core
 
 import (
 	"fmt"
+	"path/filepath"
+
+	"github.com/JsonLee12138/json-server/pkg/utils"
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
-	"path/filepath"
 )
 
 type ConfigInterface interface {
@@ -25,7 +27,7 @@ type ConfigOptions struct {
 
 func DefaultConfigOptions() ConfigOptions {
 	return ConfigOptions{
-		BasePath:  "./config",
+		BasePath:  "config",
 		FileName:  "config",
 		FileType:  "yaml",
 		WatchAble: true,
@@ -37,6 +39,9 @@ func NewConfig(optsArr ...ConfigOptions) (*Config, error) {
 	var opts ConfigOptions
 	if len(optsArr) == 0 {
 		opts = DefaultConfigOptions()
+		optsArr = append(optsArr, opts)
+	} else {
+		opts = optsArr[0]
 	}
 	instance, err := CreateConfig(optsArr...)
 	if err != nil {
@@ -71,8 +76,10 @@ func CreateConfig(optsArr ...ConfigOptions) (*viper.Viper, error) {
 	var opts ConfigOptions
 	if len(optsArr) == 0 {
 		opts = DefaultConfigOptions()
+	} else {
+		opts = optsArr[0]
 	}
-	configPaths := getConfigFilePaths(optsArr...)
+	configPaths := getConfigFilePaths(opts)
 	if len(configPaths) == 0 {
 		return nil, fmt.Errorf("❌ No valid configuration files found")
 	}
@@ -88,11 +95,7 @@ func CreateConfig(optsArr ...ConfigOptions) (*viper.Viper, error) {
 	return v, nil
 }
 
-func getConfigFilePaths(optsArr ...ConfigOptions) (configFiles []string) {
-	var opts ConfigOptions
-	if len(optsArr) == 0 {
-		opts = DefaultConfigOptions()
-	}
+func getConfigFilePaths(opts ConfigOptions) (configFiles []string) {
 	env := Mode()
 	fileNames := []string{
 		opts.FileName,
@@ -119,7 +122,7 @@ func getConfigFilePaths(optsArr ...ConfigOptions) (configFiles []string) {
 	}
 	for _, fileName := range fileNames {
 		file := filepath.Join(opts.BasePath, fmt.Sprintf("%s.%s", fileName, opts.FileType))
-		if isDir, exists, _ := Exists(file); exists && !isDir {
+		if isDir, exists, _ := utils.Exists(file); exists && !isDir {
 			configFiles = append(configFiles, file)
 		}
 	}

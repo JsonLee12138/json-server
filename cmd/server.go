@@ -7,7 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/JsonLee12138/json-server/core"
+	"github.com/JsonLee12138/json-server/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -37,7 +37,7 @@ func init() {
 // 核心运行逻辑
 func runApp() {
 	if showPort != "" {
-		pid, err := core.FindPIDByPort(showPort)
+		pid, err := utils.FindPIDByPort(showPort)
 		if err != nil {
 			panic(err)
 		}
@@ -49,7 +49,7 @@ func runApp() {
 		os.Exit(0)
 	}
 	if killPort != "" {
-		pid, err := core.FindPIDByPort(killPort)
+		pid, err := utils.FindPIDByPort(killPort)
 		if err != nil {
 			panic(err)
 		}
@@ -57,7 +57,7 @@ func runApp() {
 			fmt.Println("No process found on port")
 		} else {
 			fmt.Println("Process running on port", killPort, "is", pid)
-			err = core.KillProcess(pid)
+			err = utils.KillProcess(pid)
 			if err != nil {
 				panic(err)
 			}
@@ -77,7 +77,7 @@ func runApp() {
 	cmd.Stderr = os.Stderr
 	ModeEnvHandler(env)
 	// 执行命令
-	core.RaiseVoid(cmd.Start())
+	utils.RaiseVoid(cmd.Start())
 	go func() {
 		err := cmd.Wait()
 		if err != nil {
@@ -91,8 +91,6 @@ func runApp() {
 	signal.Notify(signalChannel, syscall.SIGINT, syscall.SIGTERM)
 
 	<-signalChannel
-	//sig := <-signalChannel
-	//fmt.Println("\nReceived signal:", sig)
 
-	core.RaiseVoid(cmd.Process.Kill())
+	utils.RaiseVoid(cmd.Process.Kill())
 }

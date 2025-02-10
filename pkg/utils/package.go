@@ -1,10 +1,8 @@
-package core
+package utils
 
 import (
 	"bytes"
 	"fmt"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 	"os"
 	"os/exec"
 	"strings"
@@ -71,31 +69,4 @@ func GetModuleFullPath(module string) (string, error) {
 		res = strings.TrimSuffix(res, "/")
 	}
 	return res, nil
-}
-
-func UpperCamelCase(s string) string {
-	s = strings.Replace(s, "_", " ", -1)
-	c := cases.Title(language.English)
-	s = c.String(s)
-	return strings.Replace(s, " ", "", -1)
-}
-
-func FindPIDByPort(port string) (string, error) {
-	cmd := exec.Command("lsof", "-t", "-i", ":"+port)
-	output, err := cmd.Output()
-	if err != nil {
-		return "", fmt.Errorf("error getting process info: %v", err)
-	}
-	if len(output) == 0 {
-		return "", nil
-	}
-	return strings.TrimSpace(string(output)), nil
-}
-
-func KillProcess(pid string) error {
-	killCmd := exec.Command("kill", pid)
-	if err := killCmd.Run(); err != nil {
-		return err
-	}
-	return nil
 }

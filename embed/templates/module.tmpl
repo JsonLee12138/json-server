@@ -4,12 +4,22 @@ import (
 	"{{ .PkgPath }}/controller"
 	"{{ .PkgPath }}/service"
 	"{{ .PkgPath }}/repository"
+	"github.com/JsonLee12138/json-server/core"
+	"github.com/gofiber/fiber/v2"
 	"go.uber.org/dig"
 )
 
 // Register{{ .Name }}Module 在 DI 容器中注册 {{ .Name }} 模块
-func {{ .UpperName }}ModuleSetup(container *dig.Container) {
-	container.Provide(controller.New{{ .UpperName }}Controller)
-	container.Provide(service.New{{ .UpperName }}Service)
-	container.Provide(repository.New{{ .UpperName }}Repository)
+func {{ .UpperName }}ModuleSetup(container *dig.Container) error {
+    return core.TryCatchVoid(func() {
+        scope := container.Scope("{{ .Name }}")
+        core.RaiseVoid(scope.Provide(controller.New{{ .UpperName }}Controller))
+        core.RaiseVoid(scope.Provide(service.New{{ .UpperName }}Service))
+        core.RaiseVoid(scope.Provide(repository.New{{ .UpperName }}Repository))
+
+        core.RaiseVoid(scope.Invoke(func(app *fiber.App, {{ .Name }}Controller *controller.{{ .UpperName }}Controller) {
+            group := app.Group("{{ .Name }}")
+            group.Get("/", {{ .Name }}Controller.HelloWord)
+        }))
+    }, core.DefaultErrorHandler)
 }

@@ -1,4 +1,4 @@
-package core
+package utils
 
 import (
 	"bytes"
@@ -164,5 +164,14 @@ func CreateFunction(file *ast.File, name string, content *ast.BlockStmt) {
 	err := printer.Fprint(os.Stdout, fset, file)
 	if err != nil {
 		fmt.Printf("Error printing code: %v\n", err)
+	}
+}
+
+func FindTryCatchVoid(content *ast.SelectorExpr) {
+	if content.Sel.Name == "TryCatchVoid" {
+		//if ident, ok := content.X.(*ast.Ident); ok && ident.Name == "core" {
+		//
+		//}
+		//fmt.Println(content.)
 	}
 }
