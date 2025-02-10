@@ -1,9 +1,10 @@
 package core
 
 import (
+	"time"
+
 	"github.com/rs/xid"
 	"gorm.io/gorm"
-	"time"
 )
 
 type BaseEntity struct {
@@ -21,7 +22,7 @@ type BaseEntityWithID struct {
 }
 
 type BaseEntityWithUuid struct {
-	ID string `json:"id" gorm:"primarykey;type:char(20)" json:"id"`
+	ID string `json:"id" gorm:"primarykey;type:char(20)"`
 	BaseEntity
 }
 
