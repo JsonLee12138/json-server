@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/JsonLee12138/json-server/embed"
+	"github.com/JsonLee12138/json-server/pkg/core"
 	"github.com/JsonLee12138/json-server/pkg/utils"
 )
 
@@ -18,7 +19,7 @@ func GenerateRepository(repositoryName, output string, override bool) error {
 		params := map[string]string{
 			"Name": upperName,
 		}
-		utils.RaiseVoid(GenerateFileExistsHandler(outputPath, tmplFile, params, override))
+		utils.RaiseVoid(core.GenerateFileExistsHandler(outputPath, tmplFile, params, override))
 		fmt.Printf("✅ '%s' repository has been successfully generated!\n", repositoryName)
 	}, utils.DefaultErrorHandler)
 }

@@ -2,8 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"os"
+
+	"github.com/spf13/cobra"
 )
 
 // RootCmd 定义 CLI 的根命令
@@ -13,7 +14,7 @@ var RootCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(ServerCmd, GenerateCmd)
+	RootCmd.AddCommand(ServerCmd, GenerateCmd, AutoMigrateCmd)
 }
 
 // Execute 入口，加载所有命令

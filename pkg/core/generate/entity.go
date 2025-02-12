@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/JsonLee12138/json-server/embed"
+	"github.com/JsonLee12138/json-server/pkg/core"
 	"github.com/JsonLee12138/json-server/pkg/utils"
 )
 
@@ -15,7 +16,7 @@ func GenerateEntity(entityName, outPath string, override bool) error {
 		params := map[string]string{
 			"Name": upperName,
 		}
-		utils.RaiseVoid(GenerateFileExistsHandler(entityPath, tmpl, params, override))
+		utils.RaiseVoid(core.GenerateFileExistsHandler(entityPath, tmpl, params, override))
 		fmt.Printf("✅ '%s' entity has been successfully generated!\n", entityName)
 	}, utils.DefaultErrorHandler)
 }

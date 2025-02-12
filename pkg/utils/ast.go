@@ -131,6 +131,7 @@ func WriteToFileByFset(fset *token.FileSet, file *ast.File, filePath string) err
 		RaiseVoid(os.WriteFile(filePath, buf.Bytes(), 0644))
 	}, DefaultErrorHandler)
 }
+
 func CreateFunction(file *ast.File, name string, content *ast.BlockStmt) {
 	funcName := ast.NewIdent(name)
 	params := &ast.FieldList{

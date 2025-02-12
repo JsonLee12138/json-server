@@ -9,4 +9,7 @@ type SystemConfig struct {
 	Port             string `mapstructure:"port" json:"port" yaml:"port" toml:"port"`
 	RouterPrefix     string `mapstructure:"router-prefix" json:"router-prefix" yaml:"router-prefix" toml:"router-prefix"`
 	DBType           string `mapstructure:"db-type" json:"db-type" yaml:"db-type" toml:"db-type"`
+	SwaggerAble      bool   `mapstructure:"swaggerable" json:"swaggerable" yaml:"swaggerable" toml:"swaggerable"`
+	ApifoxAble       bool   `mapstructure:"apifoxable" json:"apifoxable" yaml:"apifoxable" toml:"apifoxable"`
+	OpenApiAble      bool   `mapstructure:"openapiable" json:"openapiable" yaml:"openapiable" toml:"openapiable"`
 }

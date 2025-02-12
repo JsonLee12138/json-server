@@ -2,11 +2,13 @@ package generate
 
 import (
 	"fmt"
-	"github.com/JsonLee12138/json-server/embed"
-	"github.com/JsonLee12138/json-server/pkg/utils"
 	"go/ast"
 	"go/token"
 	"strings"
+
+	"github.com/JsonLee12138/json-server/embed"
+	"github.com/JsonLee12138/json-server/pkg/core"
+	"github.com/JsonLee12138/json-server/pkg/utils"
 )
 
 func GenerateController(controllerName, output string, override bool, moduleName string) error {
@@ -19,7 +21,7 @@ func GenerateController(controllerName, output string, override bool, moduleName
 			"Name":    upperName,
 			"PkgPath": pkgPath,
 		}
-		utils.RaiseVoid(GenerateFileExistsHandler(outputPath, tmplFile, params, override))
+		utils.RaiseVoid(core.GenerateFileExistsHandler(outputPath, tmplFile, params, override))
 		fmt.Printf("✅ '%s' controller has been successfully generated!\n", controllerName)
 	}, utils.DefaultErrorHandler)
 }
