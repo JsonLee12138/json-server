@@ -45,6 +45,30 @@ func RaiseVoid(err error) {
 	}
 }
 
+func RaiseByError(err error, customError error) {
+	if err != nil {
+		panic(customError)
+	}
+}
+
+func RaiseByErrorHandler(err error, errHandler ErrorHandler) {
+	if err != nil {
+		panic(errHandler(err))
+	}
+}
+
+func RaiseVoidByError(err error, customError error) {
+	if err != nil {
+		panic(customError)
+	}
+}
+
+func RaiseVoidByErrorHandler(err error, errHandler ErrorHandler) {
+	if err != nil {
+		panic(errHandler(err))
+	}
+}
+
 func DefaultErrorHandler(err error) error {
 	println("Error: ", err.Error())
 	return err
