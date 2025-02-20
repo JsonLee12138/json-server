@@ -57,7 +57,6 @@ func (f *Logger) GetWriteSyncer(level string) zapcore.WriteSyncer {
 		config: f.config,
 		level:  level,
 	}
-	//fileWriter := NewCutter(f.config.Director, level, WithCutterFormat("2006-01-02"))
 	if f.config.LogInTerminal {
 		return zapcore.NewMultiWriteSyncer(zapcore.AddSync(os.Stdout), zapcore.AddSync(fileWriter))
 	}

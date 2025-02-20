@@ -26,6 +26,207 @@ func GenerateController(controllerName, output string, override bool, moduleName
 	}, utils.DefaultErrorHandler)
 }
 
+func GenerateProvideControllerHandler(controllerName string) *ast.ExprStmt {
+	upperControllerName := utils.UpperCamelCase(controllerName)
+	return &ast.ExprStmt{
+		X: &ast.CallExpr{
+			Fun: &ast.SelectorExpr{
+				X:   ast.NewIdent("utils"),
+				Sel: ast.NewIdent("RaiseVoid"),
+			},
+			Args: []ast.Expr{
+				&ast.CallExpr{
+					Fun: &ast.SelectorExpr{
+						X:   ast.NewIdent("scope"),
+						Sel: ast.NewIdent("Provide"),
+					},
+					Args: []ast.Expr{
+						&ast.SelectorExpr{
+							X:   ast.NewIdent("controller"),
+							Sel: ast.NewIdent(fmt.Sprintf("New%sController", upperControllerName)),
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func GenerateRouterHandler(controllerName string) *ast.ExprStmt {
+	return &ast.ExprStmt{
+		X: &ast.CallExpr{
+			Fun: &ast.SelectorExpr{
+				X:   ast.NewIdent("group"),
+				Sel: ast.NewIdent("Get"),
+			},
+			Args: []ast.Expr{
+				&ast.BasicLit{
+					Kind:  token.STRING,
+					Value: fmt.Sprintf(`"%s"`, controllerName),
+				},
+				&ast.SelectorExpr{
+					X:   ast.NewIdent(fmt.Sprintf("%sController", controllerName)),
+					Sel: ast.NewIdent("HelloWorld"),
+				},
+			},
+		},
+	}
+}
+
+func GenerateProvideControllerFn(controllerName string, outPath string) ([]*ast.ImportSpec, *ast.FuncDecl) {
+	imports := []*ast.ImportSpec{
+		{
+			Name: &ast.Ident{
+				Name: "dig",
+			},
+		},
+		{
+			Path: &ast.BasicLit{
+				Kind:  token.STRING,
+				Value: "github.com/JsonLee12138/json-server/pkg/utils",
+			},
+		},
+		{
+			Path: &ast.BasicLit{
+				Kind:  token.STRING,
+				Value: fmt.Sprintf("\"%s/controller\"", outPath),
+			},
+		},
+	}
+	provideControllerHandler := GenerateProvideControllerHandler(controllerName)
+	fn := &ast.FuncDecl{
+		Name: ast.NewIdent("ProvideController"),
+		Type: &ast.FuncType{
+			Params: &ast.FieldList{
+				List: []*ast.Field{
+					{
+						Names: []*ast.Ident{
+							ast.NewIdent("scope"),
+						},
+						Type: &ast.StarExpr{
+							X: &ast.SelectorExpr{
+								X:   ast.NewIdent("dig"),
+								Sel: ast.NewIdent("Scope"),
+							},
+						},
+					},
+				},
+			},
+			Results: &ast.FieldList{
+				List: []*ast.Field{
+					{
+						Type: ast.NewIdent("error"),
+					},
+				},
+			},
+		},
+		Body: &ast.BlockStmt{
+			List: []ast.Stmt{
+				&ast.ReturnStmt{
+					Results: []ast.Expr{
+						&ast.CallExpr{
+							Fun: &ast.SelectorExpr{
+								X:   ast.NewIdent("utils"),
+								Sel: ast.NewIdent("RaiseVoid"),
+							},
+							Args: []ast.Expr{
+								&ast.FuncLit{
+									Type: &ast.FuncType{
+										Params: &ast.FieldList{
+											List: []*ast.Field{},
+										},
+									},
+									Body: &ast.BlockStmt{
+										List: []ast.Stmt{
+											provideControllerHandler,
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	return imports, fn
+}
+
+func GenerateRouterFn(controllerName string, outPath string) ([]*ast.ImportSpec, *ast.FuncDecl) {
+	imports := []*ast.ImportSpec{
+		{
+			Name: ast.NewIdent("fiber"),
+		},
+		{
+			Path: &ast.BasicLit{
+				Kind:  token.STRING,
+				Value: fmt.Sprintf("\"%s/controller\"", outPath),
+			},
+		},
+	}
+	upperControllerName := utils.UpperCamelCase(controllerName)
+	routerHandler := GenerateRouterHandler(controllerName)
+	pathArr := strings.Split(outPath, "/")
+	moduleName := pathArr[len(pathArr)-1]
+	fn := &ast.FuncDecl{
+		Name: ast.NewIdent("RouterSetup"),
+		Type: &ast.FuncType{
+			Params: &ast.FieldList{
+				List: []*ast.Field{
+					{
+						Names: []*ast.Ident{
+							ast.NewIdent("app"),
+						},
+						Type: &ast.StarExpr{
+							X: &ast.SelectorExpr{
+								X:   ast.NewIdent("fiber"),
+								Sel: ast.NewIdent("App"),
+							},
+						},
+					},
+					{
+						Names: []*ast.Ident{
+							ast.NewIdent(fmt.Sprintf("%sController", controllerName)),
+						},
+						Type: &ast.StarExpr{
+							X: &ast.SelectorExpr{
+								X:   ast.NewIdent("controller"),
+								Sel: ast.NewIdent(fmt.Sprintf("%sController", upperControllerName)),
+							},
+						},
+					},
+				},
+			},
+		},
+		Body: &ast.BlockStmt{
+			List: []ast.Stmt{
+				&ast.AssignStmt{
+					Lhs: []ast.Expr{
+						ast.NewIdent("group"),
+					},
+					Tok: token.DEFINE,
+					Rhs: []ast.Expr{
+						&ast.CallExpr{
+							Fun: &ast.SelectorExpr{
+								X:   ast.NewIdent("app"),
+								Sel: ast.NewIdent("Group"),
+							},
+							Args: []ast.Expr{
+								&ast.BasicLit{
+									Kind:  token.STRING,
+									Value: fmt.Sprintf(`"%s"`, moduleName),
+								},
+							},
+						},
+					},
+				},
+				routerHandler,
+			},
+		},
+	}
+	return imports, fn
+}
+
 func InjectController(controllerName, output string) error {
 	return utils.TryCatchVoid(func() {
 		entryPath := fmt.Sprintf("%s/entry.go", output)
@@ -35,138 +236,68 @@ func InjectController(controllerName, output string) error {
 			utils.Throw(err)
 		}
 		if !exists || isDir {
-			//core.RaiseVoid(core.OnlyCreateFile(entryPath))
 			utils.RaiseVoid(GenerateEntry(output))
 		}
 		file, _, err := utils.ParseFile(entryPath)
-		if err != nil {
-			utils.Throw(err)
-		}
-		pathArr := strings.Split(output, "/")
-		moduleName := pathArr[len(pathArr)-1]
-		upperModuleName := utils.UpperCamelCase(moduleName)
-		upperControllerName := utils.UpperCamelCase(controllerName)
-		funs := utils.Raise(utils.FindFunctions(file, ".*ModuleSetup$", utils.RegexMatch))
-		content := &ast.BlockStmt{
-			List: []ast.Stmt{
-				&ast.ExprStmt{
-					X: &ast.CallExpr{
-						Fun: &ast.SelectorExpr{
-							X:   ast.NewIdent("container"),
-							Sel: ast.NewIdent("Provide"),
-						},
-						Args: []ast.Expr{
-							&ast.SelectorExpr{
-								X:   ast.NewIdent("controller"),
-								Sel: ast.NewIdent(fmt.Sprintf("New%sController", upperControllerName)),
-							},
-						},
-					},
-				},
-			},
-		}
-		routerContent := &ast.BlockStmt{
-			List: []ast.Stmt{
-				&ast.ExprStmt{
-					X: &ast.CallExpr{
-						Fun: &ast.SelectorExpr{
-							X:   ast.NewIdent("group"),
-							Sel: ast.NewIdent("Get"),
-						},
-						Args: []ast.Expr{
-							&ast.BasicLit{
-								Kind:  token.STRING,
-								Value: fmt.Sprintf(`"%s"`, controllerName),
-							},
-							&ast.SelectorExpr{
-								X:   ast.NewIdent(fmt.Sprintf("%sController", controllerName)),
-								Sel: ast.NewIdent("HelloWorld"),
-							},
-						},
-					},
-				},
-			},
-		}
-		fmt.Println("routerContent:", routerContent)
-		if len(funs) == 0 {
-			file.Imports = append(file.Imports, &ast.ImportSpec{
-				Name: &ast.Ident{
-					Name: "dig",
-				},
-				Path: &ast.BasicLit{
-					Kind:  token.STRING,
-					Value: fmt.Sprintf("\"%s/service\"", output),
-				},
-			})
-			params := &ast.FieldList{
-				List: []*ast.Field{
-					{
-						Names: []*ast.Ident{
-							ast.NewIdent("container"),
-						},
-						Type: &ast.StarExpr{
-							X: &ast.SelectorExpr{
-								X: ast.NewIdent("dig"),
-								Sel: &ast.Ident{
-									Name: "Container",
-								},
-							},
-						},
-					},
-				},
-			}
-			utils.CreateFunc(file, fmt.Sprintf("%sModuleSetup", upperModuleName), params, content)
-		} else {
-			fn := funs[0].Node.(*ast.FuncDecl)
-			//fn.Body.List = append(fn.Body.List, content.List...)
-			for _, stmt := range fn.Body.List {
-				if retStmt, ok := stmt.(*ast.ReturnStmt); ok {
-					fmt.Println("returnStmt:", retStmt)
-					if len(retStmt.Results) == 1 {
-						if callExpr, ok := retStmt.Results[0].(*ast.CallExpr); ok {
-							if selExpr, ok := callExpr.Fun.(*ast.SelectorExpr); ok {
-								if selExpr.Sel.Name == "TryCatchVoid" {
-									if ident, ok := selExpr.X.(*ast.Ident); ok && ident.Name == "core" {
-										//return true
-										fmt.Println("trycatch:", ident)
+		utils.RaiseVoid(err)
 
-									}
+		provideControllerFns := utils.Raise(utils.FindFunctions(file, "ProvideController", utils.ExactMatch))
+		if len(provideControllerFns) == 0 {
+			provideControllerImports, provideControllerFn := GenerateProvideControllerFn(controllerName, output)
+			file.Imports = utils.UniqueImports(append(file.Imports, provideControllerImports...))
+			file.Decls = append(file.Decls, provideControllerFn)
+		} else {
+			controllerContent := GenerateProvideControllerHandler(controllerName)
+			provideControllerFn := provideControllerFns[0].Node.(*ast.FuncDecl)
+			for _, stmt := range provideControllerFn.Body.List {
+				if returnStmt, ok := stmt.(*ast.ReturnStmt); ok {
+					for _, result := range returnStmt.Results {
+						if callExpr, ok := result.(*ast.CallExpr); ok {
+							if inTryCatchVoid(callExpr) {
+								if fn, ok := callExpr.Args[0].(*ast.FuncLit); ok {
+									fn.Body.List = append(fn.Body.List, controllerContent)
 								}
 							}
 						}
 					}
-					//if callExpr, ok := returnStmt.X.(*ast.CallExpr); ok {
-					//	fmt.Println("callExpr:", callExpr)
-					//	if isRaiseVoidWithInvoke(callExpr) {
-					//		fmt.Println("i:", i)
-					//		fmt.Println("callExpr:", callExpr)
-					//		fn.Body.List = append(fn.Body.List[:i], routerContent.List[i:]...)
-					//		// Step 1: Insert new `scope.Provide` before this statement
-					//		//injection := createInjectionStmt()
-					//		//body.List = append(body.List[:i], append([]ast.Stmt{injection}, body.List[i:]...)...)
-					//		//
-					//		//// Step 2: Modify `scope.Invoke` body
-					//		//modifyInvokeBody(callExpr)
-					//		break
-					//	}
-					//}
 				}
 			}
 		}
+
+		routerFns := utils.Raise(utils.FindFunctions(file, "RouterSetup", utils.ExactMatch))
+		if len(routerFns) == 0 {
+			routerImports, routerFn := GenerateRouterFn(controllerName, output)
+			file.Imports = utils.UniqueImports(append(file.Imports, routerImports...))
+			file.Decls = append(file.Decls, routerFn)
+		} else {
+			routerContent := GenerateRouterHandler(controllerName)
+			routerFn := routerFns[0].Node.(*ast.FuncDecl)
+			upperControllerName := utils.UpperCamelCase(controllerName)
+			newParams := []*ast.Field{
+				{
+					Names: []*ast.Ident{
+						ast.NewIdent(fmt.Sprintf("%sController", controllerName)),
+					},
+					Type: &ast.StarExpr{
+						X: &ast.SelectorExpr{
+							X:   ast.NewIdent("controller"),
+							Sel: ast.NewIdent(fmt.Sprintf("%sController", upperControllerName)),
+						},
+					},
+				},
+			}
+			routerFn.Type.Params.List = append(routerFn.Type.Params.List, newParams...)
+			routerFn.Body.List = append(routerFn.Body.List, routerContent)
+		}
+
 		utils.RaiseVoid(utils.WriteToFile(file, entryPath))
 		fmt.Printf("✅ '%s' controller has been successfully injected!\n", controllerName)
 	}, utils.DefaultErrorHandler)
 }
 
-func isRaiseVoidWithInvoke(callExpr *ast.CallExpr) bool {
-	if selExpr, ok := callExpr.Fun.(*ast.SelectorExpr); ok && selExpr.Sel.Name == "RaiseVoid" {
-		if len(callExpr.Args) == 1 {
-			if innerCall, ok := callExpr.Args[0].(*ast.CallExpr); ok {
-				if innerSel, ok := innerCall.Fun.(*ast.SelectorExpr); ok {
-					return innerSel.Sel.Name == "Invoke"
-				}
-			}
-		}
+func inTryCatchVoid(callExpr *ast.CallExpr) bool {
+	if selExpr, ok := callExpr.Fun.(*ast.SelectorExpr); ok && selExpr.Sel.Name == "TryCatchVoid" {
+		return true
 	}
 	return false
 }

@@ -9,17 +9,35 @@ import (
 	"go.uber.org/dig"
 )
 
-// Register{{ .Name }}Module 在 DI 容器中注册 {{ .Name }} 模块
+func ProvideController(scope *dig.Scope) error {
+	return utils.TryCatchVoid(func() {
+		utils.RaiseVoid(scope.Provide(controller.New{{ .UpperName }}Controller))
+	}, utils.DefaultErrorHandler)
+}
+
+func ProvideService(scope *dig.Scope) error {
+	return utils.TryCatchVoid(func() {
+		utils.RaiseVoid(scope.Provide(service.New{{ .UpperName }}Service))
+	}, utils.DefaultErrorHandler)
+}
+
+func ProvideRepository(scope *dig.Scope) error {
+	return utils.TryCatchVoid(func() {
+		utils.RaiseVoid(scope.Provide(repository.New{{ .UpperName }}Repository))
+	}, utils.DefaultErrorHandler)
+}
+
+func RouterSetup(app *fiber.App, {{ .Name }}Controller *controller.{{ .UpperName }}Controller) {
+	group := app.Group("{{ .Name }}")
+	group.Get("/", {{ .Name }}Controller.HelloWord)
+}
+
 func {{ .UpperName }}ModuleSetup(container *dig.Container) error {
     return core.TryCatchVoid(func() {
-        scope := container.Scope("{{ .Name }}")
-        core.RaiseVoid(scope.Provide(controller.New{{ .UpperName }}Controller))
-        core.RaiseVoid(scope.Provide(service.New{{ .UpperName }}Service))
-        core.RaiseVoid(scope.Provide(repository.New{{ .UpperName }}Repository))
-
-        core.RaiseVoid(scope.Invoke(func(app *fiber.App, {{ .Name }}Controller *controller.{{ .UpperName }}Controller) {
-            group := app.Group("{{ .Name }}")
-            group.Get("/", {{ .Name }}Controller.HelloWord)
-        }))
+      scope := container.Scope("{{ .Name }}")
+      utils.RaiseVoid(ProvideController(scope))
+			utils.RaiseVoid(ProvideService(scope))
+			utils.RaiseVoid(ProvideRepository(scope))
+      utils.RaiseVoid(scope.Invoke(RouterSetup))
     }, core.DefaultErrorHandler)
 }

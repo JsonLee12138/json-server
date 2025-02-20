@@ -13,7 +13,7 @@ import (
 
 func GenerateRepository(repositoryName, output string, override bool) error {
 	return utils.TryCatchVoid(func() {
-		tmplFile := string(utils.Raise[[]byte](embed.TemplatesPath.ReadFile("templates/repository.tmpl")))
+		tmplFile := string(utils.Raise(embed.TemplatesPath.ReadFile("templates/repository.tmpl")))
 		upperName := utils.UpperCamelCase(repositoryName)
 		outputPath := fmt.Sprintf("%s/repository/%s_repository.go", output, repositoryName)
 		params := map[string]string{

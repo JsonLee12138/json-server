@@ -15,9 +15,9 @@ import (
 type MatchType int
 
 const (
-	ExactMatch MatchType = iota
-	RegexMatch
-	ContainsMatch
+	ExactMatch    MatchType = iota // 精确匹配
+	RegexMatch                     // 正则匹配
+	ContainsMatch                  // 包含匹配
 )
 
 type SearchResult struct {
@@ -175,4 +175,16 @@ func FindTryCatchVoid(content *ast.SelectorExpr) {
 		//}
 		//fmt.Println(content.)
 	}
+}
+
+func UniqueImports(imports []*ast.ImportSpec) []*ast.ImportSpec {
+	uniqueImports := make(map[string]*ast.ImportSpec)
+	for _, importSpec := range imports {
+		uniqueImports[importSpec.Path.Value] = importSpec
+	}
+	uniqueImportList := make([]*ast.ImportSpec, 0, len(uniqueImports))
+	for _, importSpec := range uniqueImports {
+		uniqueImportList = append(uniqueImportList, importSpec)
+	}
+	return uniqueImportList
 }

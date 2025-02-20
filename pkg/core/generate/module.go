@@ -2,12 +2,13 @@ package generate
 
 import (
 	"fmt"
-	"github.com/JsonLee12138/json-server/embed"
-	core2 "github.com/JsonLee12138/json-server/pkg/core"
-	"github.com/JsonLee12138/json-server/pkg/utils"
 	"path"
 	"slices"
 	"strings"
+
+	"github.com/JsonLee12138/json-server/embed"
+	"github.com/JsonLee12138/json-server/pkg/core"
+	"github.com/JsonLee12138/json-server/pkg/utils"
 )
 
 func GenerateModule(moduleName, outPath string) error {
@@ -49,13 +50,13 @@ func GenerateEntry(outPath string) error {
 		return err
 	}
 	if has && !isDir {
-		return fmt.Errorf("❌ '%s' has already existed!\n", moduleName)
+		return fmt.Errorf("❌ '%s' has already existed", moduleName)
 	}
 	return utils.TryCatchVoid(func() {
 		tmplFile := utils.Raise(embed.TemplatesPath.ReadFile("templates/module.tmpl"))
 		pkgPath := utils.Raise(utils.GetModuleFullPath(moduleName))
 		upperName := utils.UpperCamelCase(moduleName)
-		utils.RaiseVoid(core2.GenerateFromTemplateFile(string(tmplFile), currentPath, map[string]string{
+		utils.RaiseVoid(core.GenerateFromTemplateFile(string(tmplFile), currentPath, map[string]string{
 			"Name":      moduleName,
 			"UpperName": upperName,
 			"PkgPath":   pkgPath,
