@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
-	"strings"
 
 	"github.com/JsonLee12138/json-server/embed"
 	"github.com/JsonLee12138/json-server/pkg/core"
@@ -26,6 +25,111 @@ func GenerateService(serviceName, output string, override bool, moduleName strin
 	}, utils.DefaultErrorHandler)
 }
 
+func GenerateProvideServiceHandler(serviceName string) *ast.ExprStmt {
+	upperServiceName := utils.UpperCamelCase(serviceName)
+	return &ast.ExprStmt{
+		X: &ast.CallExpr{
+			Fun: &ast.SelectorExpr{
+				X:   ast.NewIdent("utils"),
+				Sel: ast.NewIdent("RaiseVoid"),
+			},
+			Args: []ast.Expr{
+				&ast.CallExpr{
+					Fun: &ast.SelectorExpr{
+						X:   ast.NewIdent("scope"),
+						Sel: ast.NewIdent("Provide"),
+					},
+					Args: []ast.Expr{
+						&ast.SelectorExpr{
+							X:   ast.NewIdent("service"),
+							Sel: ast.NewIdent(fmt.Sprintf("New%sService", upperServiceName)),
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func GenerateProvideServiceFn(serviceName string, outPath string) ([]*ast.ImportSpec, *ast.FuncDecl) {
+	imports := []*ast.ImportSpec{
+		{
+			Name: &ast.Ident{
+				Name: "dig",
+			},
+		},
+		{
+			Path: &ast.BasicLit{
+				Kind:  token.STRING,
+				Value: "github.com/JsonLee12138/json-server/pkg/utils",
+			},
+		},
+		{
+			Path: &ast.BasicLit{
+				Kind:  token.STRING,
+				Value: fmt.Sprintf("\"%s/service\"", outPath),
+			},
+		},
+	}
+	provideServiceHandler := GenerateProvideServiceHandler(serviceName)
+	fn := &ast.FuncDecl{
+		Name: ast.NewIdent("ProvideService"),
+		Type: &ast.FuncType{
+			Params: &ast.FieldList{
+				List: []*ast.Field{
+					{
+						Names: []*ast.Ident{
+							ast.NewIdent("scope"),
+						},
+						Type: &ast.StarExpr{
+							X: &ast.SelectorExpr{
+								X:   ast.NewIdent("dig"),
+								Sel: ast.NewIdent("Scope"),
+							},
+						},
+					},
+				},
+			},
+			Results: &ast.FieldList{
+				List: []*ast.Field{
+					{
+						Type: ast.NewIdent("error"),
+					},
+				},
+			},
+		},
+		Body: &ast.BlockStmt{
+			List: []ast.Stmt{
+				&ast.ReturnStmt{
+					Results: []ast.Expr{
+						&ast.CallExpr{
+							Fun: &ast.SelectorExpr{
+								X:   ast.NewIdent("utils"),
+								Sel: ast.NewIdent("RaiseVoid"),
+							},
+							Args: []ast.Expr{
+								&ast.FuncLit{
+									Type: &ast.FuncType{
+										Params: &ast.FieldList{
+											List: []*ast.Field{},
+										},
+									},
+									Body: &ast.BlockStmt{
+										List: []ast.Stmt{
+											provideServiceHandler,
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	return imports, fn
+}
+
 func InjectService(serviceName, output string) error {
 	return utils.TryCatchVoid(func() {
 		entryPath := fmt.Sprintf("%s/entry.go", output)
@@ -34,68 +138,34 @@ func InjectService(serviceName, output string) error {
 			utils.Throw(err)
 		}
 		if !exists || isDir {
-			//core.RaiseVoid(core.OnlyCreateFile(entryPath))
 			utils.RaiseVoid(GenerateEntry(output))
 		}
 		file, _, err := utils.ParseFile(entryPath)
-		if err != nil {
-			utils.Throw(err)
-		}
-		pathArr := strings.Split(output, "/")
-		moduleName := pathArr[len(pathArr)-1]
-		upperModuleName := utils.UpperCamelCase(moduleName)
-		upperServiceName := utils.UpperCamelCase(serviceName)
-		funs := utils.Raise(utils.FindFunctions(file, ".*ModuleSetup$", utils.RegexMatch))
-		content := &ast.BlockStmt{
-			List: []ast.Stmt{
-				&ast.ExprStmt{
-					X: &ast.CallExpr{
-						Fun: &ast.SelectorExpr{
-							X:   ast.NewIdent("container"),
-							Sel: ast.NewIdent("Provide"),
-						},
-						Args: []ast.Expr{
-							&ast.SelectorExpr{
-								X:   ast.NewIdent("service"),
-								Sel: ast.NewIdent(fmt.Sprintf("New%sService", upperServiceName)),
-							},
-						},
-					},
-				},
-			},
-		}
-		if len(funs) == 0 {
-			file.Imports = append(file.Imports, &ast.ImportSpec{
-				Name: &ast.Ident{
-					Name: "dig",
-				},
-				Path: &ast.BasicLit{
-					Kind:  token.STRING,
-					Value: fmt.Sprintf("\"%s/service\"", output),
-				},
-			})
-			params := &ast.FieldList{
-				List: []*ast.Field{
-					{
-						Names: []*ast.Ident{
-							ast.NewIdent("container"),
-						},
-						Type: &ast.StarExpr{
-							X: &ast.SelectorExpr{
-								X: ast.NewIdent("dig"),
-								Sel: &ast.Ident{
-									Name: "Container",
-								},
-							},
-						},
-					},
-				},
-			}
-			utils.CreateFunc(file, fmt.Sprintf("%sModuleSetup", upperModuleName), params, content)
+		utils.RaiseVoid(err)
+
+		provideServiceFns := utils.Raise(utils.FindFunctions(file, "ProvideService", utils.ExactMatch))
+		if len(provideServiceFns) == 0 {
+			provideServiceImports, provideServiceFn := GenerateProvideServiceFn(serviceName, output)
+			file.Imports = utils.UniqueImports(append(file.Imports, provideServiceImports...))
+			file.Decls = append(file.Decls, provideServiceFn)
 		} else {
-			fn := funs[0].Node.(*ast.FuncDecl)
-			fn.Body.List = append(fn.Body.List, content.List...)
+			serviceContent := GenerateProvideServiceHandler(serviceName)
+			provideServiceFn := provideServiceFns[0].Node.(*ast.FuncDecl)
+			for _, stmt := range provideServiceFn.Body.List {
+				if returnStmt, ok := stmt.(*ast.ReturnStmt); ok {
+					for _, result := range returnStmt.Results {
+						if callExpr, ok := result.(*ast.CallExpr); ok {
+							if inTryCatchVoid(callExpr) {
+								if fn, ok := callExpr.Args[0].(*ast.FuncLit); ok {
+									fn.Body.List = append(fn.Body.List, serviceContent)
+								}
+							}
+						}
+					}
+				}
+			}
 		}
+
 		utils.RaiseVoid(utils.WriteToFile(file, entryPath))
 		fmt.Printf("✅ '%s' service has been successfully injected!\n", serviceName)
 	}, utils.DefaultErrorHandler)

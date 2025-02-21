@@ -15,6 +15,6 @@ func New{{ .Name }}Controller(service *service.{{ .Name }}Service) *{{.Name }}Co
 	}
 }
 
-func (c *{{ .Name }}Controller) HelloWord(ctx *fiber.Ctx) error {
-	return ctx.SendString(c.service.HelloWord())
+func (c *{{ .Name }}Controller) HelloWorld(ctx *fiber.Ctx) error {
+	return ctx.SendString(c.service.HelloWorld())
 }

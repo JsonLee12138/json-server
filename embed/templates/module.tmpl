@@ -29,7 +29,7 @@ func ProvideRepository(scope *dig.Scope) error {
 
 func RouterSetup(app *fiber.App, {{ .Name }}Controller *controller.{{ .UpperName }}Controller) {
 	group := app.Group("{{ .Name }}")
-	group.Get("/", {{ .Name }}Controller.HelloWord)
+	group.Get("/", {{ .Name }}Controller.HelloWorld)
 }
 
 func {{ .UpperName }}ModuleSetup(container *dig.Container) error {

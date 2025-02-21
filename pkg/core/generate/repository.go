@@ -71,7 +71,7 @@ func GenerateProvideRepositoryFn(repositoryName string, outPath string) ([]*ast.
 	}
 	provideRepositoryHandler := GenerateProvideRepositoryHandler(repositoryName)
 	fn := &ast.FuncDecl{
-		Name: ast.NewIdent("ProvideController"),
+		Name: ast.NewIdent("ProvideRepository"),
 		Type: &ast.FuncType{
 			Params: &ast.FieldList{
 				List: []*ast.Field{
