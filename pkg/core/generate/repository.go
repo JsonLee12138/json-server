@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
-	"strings"
 
 	"github.com/JsonLee12138/json-server/embed"
 	"github.com/JsonLee12138/json-server/pkg/core"
@@ -24,6 +23,112 @@ func GenerateRepository(repositoryName, output string, override bool) error {
 	}, utils.DefaultErrorHandler)
 }
 
+func GenerateProvideRepositoryHandler(repositoryName string) *ast.ExprStmt {
+	upperRepositoryName := utils.UpperCamelCase(repositoryName)
+	return &ast.ExprStmt{
+		X: &ast.CallExpr{
+			Fun: &ast.SelectorExpr{
+				X:   ast.NewIdent("utils"),
+				Sel: ast.NewIdent("RaiseVoid"),
+			},
+			Args: []ast.Expr{
+				&ast.CallExpr{
+					Fun: &ast.SelectorExpr{
+						X:   ast.NewIdent("scope"),
+						Sel: ast.NewIdent("Provide"),
+					},
+					Args: []ast.Expr{
+						&ast.SelectorExpr{
+							X:   ast.NewIdent("repository"),
+							Sel: ast.NewIdent(fmt.Sprintf("New%sRepository", upperRepositoryName)),
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func GenerateProvideRepositoryFn(repositoryName string, outPath string) ([]*ast.ImportSpec, *ast.FuncDecl) {
+	imports := []*ast.ImportSpec{
+		{
+			Name: &ast.Ident{
+				Name: "dig",
+			},
+		},
+		{
+			Path: &ast.BasicLit{
+				Kind:  token.STRING,
+				Value: "github.com/JsonLee12138/json-server/pkg/utils",
+			},
+		},
+		{
+			Path: &ast.BasicLit{
+				Kind:  token.STRING,
+				Value: fmt.Sprintf("\"%s/repository\"", outPath),
+			},
+		},
+	}
+	provideRepositoryHandler := GenerateProvideRepositoryHandler(repositoryName)
+	fn := &ast.FuncDecl{
+		Name: ast.NewIdent("ProvideController"),
+		Type: &ast.FuncType{
+			Params: &ast.FieldList{
+				List: []*ast.Field{
+					{
+						Names: []*ast.Ident{
+							ast.NewIdent("scope"),
+						},
+						Type: &ast.StarExpr{
+							X: &ast.SelectorExpr{
+								X:   ast.NewIdent("dig"),
+								Sel: ast.NewIdent("Scope"),
+							},
+						},
+					},
+				},
+			},
+			Results: &ast.FieldList{
+				List: []*ast.Field{
+					{
+						Type: ast.NewIdent("error"),
+					},
+				},
+			},
+		},
+		Body: &ast.BlockStmt{
+			List: []ast.Stmt{
+				&ast.ReturnStmt{
+					Results: []ast.Expr{
+						&ast.CallExpr{
+							Fun: &ast.SelectorExpr{
+								X:   ast.NewIdent("utils"),
+								Sel: ast.NewIdent("RaiseVoid"),
+							},
+							Args: []ast.Expr{
+								&ast.FuncLit{
+									Type: &ast.FuncType{
+										Params: &ast.FieldList{
+											List: []*ast.Field{},
+										},
+									},
+									Body: &ast.BlockStmt{
+										List: []ast.Stmt{
+											provideRepositoryHandler,
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	return imports, fn
+}
+
 func InjectRepository(repositoryName, output string) error {
 	return utils.TryCatchVoid(func() {
 		entryPath := fmt.Sprintf("%s/entry.go", output)
@@ -32,68 +137,34 @@ func InjectRepository(repositoryName, output string) error {
 			utils.Throw(err)
 		}
 		if !exists || isDir {
-			//core.RaiseVoid(core.OnlyCreateFile(entryPath))
 			utils.RaiseVoid(GenerateEntry(output))
 		}
 		file, _, err := utils.ParseFile(entryPath)
-		if err != nil {
-			utils.Throw(err)
-		}
-		pathArr := strings.Split(output, "/")
-		moduleName := pathArr[len(pathArr)-1]
-		upperModuleName := utils.UpperCamelCase(moduleName)
-		upperRepositoryName := utils.UpperCamelCase(repositoryName)
-		funs := utils.Raise(utils.FindFunctions(file, ".*ModuleSetup$", utils.RegexMatch))
-		content := &ast.BlockStmt{
-			List: []ast.Stmt{
-				&ast.ExprStmt{
-					X: &ast.CallExpr{
-						Fun: &ast.SelectorExpr{
-							X:   ast.NewIdent("container"),
-							Sel: ast.NewIdent("Provide"),
-						},
-						Args: []ast.Expr{
-							&ast.SelectorExpr{
-								X:   ast.NewIdent("repository"),
-								Sel: ast.NewIdent(fmt.Sprintf("New%sRepository", upperRepositoryName)),
-							},
-						},
-					},
-				},
-			},
-		}
-		if len(funs) == 0 {
-			file.Imports = append(file.Imports, &ast.ImportSpec{
-				Name: &ast.Ident{
-					Name: "dig",
-				},
-				Path: &ast.BasicLit{
-					Kind:  token.STRING,
-					Value: fmt.Sprintf("\"%s/repository\"", output),
-				},
-			})
-			params := &ast.FieldList{
-				List: []*ast.Field{
-					{
-						Names: []*ast.Ident{
-							ast.NewIdent("container"),
-						},
-						Type: &ast.StarExpr{
-							X: &ast.SelectorExpr{
-								X: ast.NewIdent("dig"),
-								Sel: &ast.Ident{
-									Name: "Container",
-								},
-							},
-						},
-					},
-				},
-			}
-			utils.CreateFunc(file, fmt.Sprintf("%sModuleSetup", upperModuleName), params, content)
+		utils.RaiseVoid(err)
+
+		provideRepositoryFns := utils.Raise(utils.FindFunctions(file, "ProvideRepository", utils.ExactMatch))
+		if len(provideRepositoryFns) == 0 {
+			provideRepositoryImports, provideRepositoryFn := GenerateProvideRepositoryFn(repositoryName, output)
+			file.Imports = utils.UniqueImports(append(file.Imports, provideRepositoryImports...))
+			file.Decls = append(file.Decls, provideRepositoryFn)
 		} else {
-			fn := funs[0].Node.(*ast.FuncDecl)
-			fn.Body.List = append(fn.Body.List, content.List...)
+			repositoryContent := GenerateProvideRepositoryHandler(repositoryName)
+			provideRepositoryFn := provideRepositoryFns[0].Node.(*ast.FuncDecl)
+			for _, stmt := range provideRepositoryFn.Body.List {
+				if returnStmt, ok := stmt.(*ast.ReturnStmt); ok {
+					for _, result := range returnStmt.Results {
+						if callExpr, ok := result.(*ast.CallExpr); ok {
+							if inTryCatchVoid(callExpr) {
+								if fn, ok := callExpr.Args[0].(*ast.FuncLit); ok {
+									fn.Body.List = append(fn.Body.List, repositoryContent)
+								}
+							}
+						}
+					}
+				}
+			}
 		}
+
 		utils.RaiseVoid(utils.WriteToFile(file, entryPath))
 		fmt.Printf("✅ '%s' repository has been successfully injected!\n", repositoryName)
 	}, utils.DefaultErrorHandler)
