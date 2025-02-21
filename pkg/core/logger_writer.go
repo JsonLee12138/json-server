@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/JsonLee12138/json-server/pkg/configs"
-	"github.com/JsonLee12138/json-server/pkg/utils"
+	"github.com/JsonLee12138/jsonix/pkg/configs"
+	"github.com/JsonLee12138/jsonix/pkg/utils"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 

@@ -24,7 +24,7 @@ type LogConfig struct {
 	MaxAge         int    `mapstructure:"max-age" json:"max-age" yaml:"max-age" toml:"max-age"`
 	MaxSize        int    `mapstructure:"max-size" json:"max-size" yaml:"max-size" toml:"max-size"`
 	MaxBackups     int    `mapstructure:"max-backups" json:"max-backups" yaml:"max-backups" toml:"max-backups"`
-	Compress       bool   `mapstructure:"compress" json:"compress" yaml:"compress" toml:"compress"`
+	Compress       bool   `mapstructure:"" json:"cocompressmpress" yaml:"compress" toml:"compress"`
 	ShowLineNumber bool   `mapstructure:"show-line-number" json:"show-line-number" yaml:"show-line-number" toml:"show-line-number"`
 }
 

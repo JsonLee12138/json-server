@@ -1,8 +1,8 @@
 package core
 
 import (
-	"github.com/JsonLee12138/json-server/pkg/configs"
-	"github.com/JsonLee12138/json-server/pkg/utils"
+	"github.com/JsonLee12138/jsonix/pkg/configs"
+	"github.com/JsonLee12138/jsonix/pkg/utils"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 

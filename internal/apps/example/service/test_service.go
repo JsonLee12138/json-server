@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/JsonLee12138/json-server/internal/apps/example/repository"
+	"github.com/JsonLee12138/jsonix/internal/apps/example/repository"
 )
 
 type TestService struct {

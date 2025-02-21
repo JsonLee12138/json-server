@@ -10,8 +10,8 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/JsonLee12138/json-server/internal/global"
-	"github.com/JsonLee12138/json-server/pkg/utils"
+	"github.com/JsonLee12138/jsonix/internal/global"
+	"github.com/JsonLee12138/jsonix/pkg/utils"
 )
 
 var (

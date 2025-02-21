@@ -1,96 +1,81 @@
 package cmd
 
 import (
-	"fmt"
+	"errors"
 	"os"
 	"os/exec"
 	"os/signal"
 	"syscall"
 
-	"github.com/JsonLee12138/json-server/pkg/utils"
+	"github.com/JsonLee12138/jsonix/pkg/utils"
 	"github.com/spf13/cobra"
-)
-
-var (
-	watchable bool
-	showPort  string
-	killPort  string
-	env       string
 )
 
 var ServerCmd = &cobra.Command{
 	Use:   "server",
 	Short: "A flexible Go configuration management tool",
-	Run: func(cmd *cobra.Command, args []string) {
-		runApp()
-	},
+	RunE:  serverRun,
 }
 
-// 初始化 CLI 标志
 func init() {
-	ServerCmd.PersistentFlags().StringVarP(&env, "env", "e", "dev", "Set the application environment (dev, prod, test)")
-	ServerCmd.PersistentFlags().BoolVarP(&watchable, "watch", "w", false, "Enable config file watching")
-	ServerCmd.PersistentFlags().StringVarP(&showPort, "show", "s", "", "Show port")
-	ServerCmd.PersistentFlags().StringVarP(&killPort, "kill", "k", "", "Kill port")
+	serverSetup(ServerCmd)
 }
 
-// 核心运行逻辑
-func runApp() {
-	if showPort != "" {
-		pid, err := utils.FindPIDByPort(showPort)
-		if err != nil {
-			panic(err)
+func serverSetup(cmd *cobra.Command) {
+	cmd.PersistentFlags().StringP("env", "e", "dev", "Set the application environment (dev, prod, test)")
+	cmd.PersistentFlags().BoolP("watch", "w", false, "Enable config file watching")
+	cmd.PersistentFlags().StringP("show", "s", "", "Show port")
+	cmd.PersistentFlags().StringP("kill", "k", "", "Kill port")
+}
+
+func serverRun(cmd *cobra.Command, args []string) error {
+	return utils.TryCatchVoid(func() {
+		env, _ := cmd.Flags().GetString("env")
+		watchable, _ := cmd.Flags().GetBool("watch")
+		showPort, _ := cmd.Flags().GetString("show")
+		killPort, _ := cmd.Flags().GetString("kill")
+		if showPort != "" {
+			pid := utils.Raise(utils.FindPIDByPort(showPort))
+			if pid == "" {
+				panic(errors.New("No process found on port"))
+			}
+			cmd.Println("Process running on port", showPort, "is", pid)
+			return
 		}
-		if pid == "" {
-			fmt.Println("No process found on port")
+		if killPort != "" {
+			pid := utils.Raise(utils.FindPIDByPort(killPort))
+			if pid == "" {
+				panic(errors.New("No process found on port"))
+			}
+			utils.RaiseVoid(utils.KillProcess(pid))
+			cmd.Println("Process killed on port", killPort)
+			return
+		}
+		var execCmd *exec.Cmd
+		if watchable {
+			execCmd = exec.Command("air")
 		} else {
-			fmt.Println("Process running on port", showPort, "is", pid)
+			execCmd = exec.Command("go", "run", "main.go")
 		}
-		os.Exit(0)
-	}
-	if killPort != "" {
-		pid, err := utils.FindPIDByPort(killPort)
-		if err != nil {
-			panic(err)
-		}
-		if pid == "" {
-			fmt.Println("No process found on port")
-		} else {
-			fmt.Println("Process running on port", killPort, "is", pid)
-			err = utils.KillProcess(pid)
+		execCmd.Dir = "."
+		execCmd.Stdout = os.Stdout
+		execCmd.Stderr = os.Stderr
+		ModeEnvHandler(env)
+		utils.RaiseVoid(execCmd.Start())
+		go func() {
+			err := execCmd.Wait()
 			if err != nil {
 				panic(err)
+			} else {
+				cmd.Println("Server started successfully!")
 			}
-			fmt.Println("Process killed")
-		}
-		os.Exit(0)
-	}
-	var cmd *exec.Cmd
-	if watchable {
-		cmd = exec.Command("air")
-	} else {
-		cmd = exec.Command("go", "run", "main.go")
-	}
-	cmd.Dir = "."
-	// 设置进程的标准输出和标准错误输出
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	ModeEnvHandler(env)
-	// 执行命令
-	utils.RaiseVoid(cmd.Start())
-	go func() {
-		err := cmd.Wait()
-		if err != nil {
-			fmt.Printf("Error occurred during the execution: %v\n", err)
-		} else {
-			fmt.Println("Command executed successfully!")
-		}
-	}()
+		}()
 
-	signalChannel := make(chan os.Signal, 1)
-	signal.Notify(signalChannel, syscall.SIGINT, syscall.SIGTERM)
+		signalChannel := make(chan os.Signal, 1)
+		signal.Notify(signalChannel, syscall.SIGINT, syscall.SIGTERM)
 
-	<-signalChannel
+		<-signalChannel
 
-	utils.RaiseVoid(cmd.Process.Kill())
+		utils.RaiseVoid(execCmd.Process.Kill())
+	}, utils.DefaultErrorHandler)
 }

@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/JsonLee12138/json-server/embed"
-	"github.com/JsonLee12138/json-server/pkg/utils"
+	"github.com/JsonLee12138/jsonix/embed"
+	"github.com/JsonLee12138/jsonix/pkg/utils"
 )
 
 const (

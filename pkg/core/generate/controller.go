@@ -6,15 +6,15 @@ import (
 	"go/token"
 	"strings"
 
-	"github.com/JsonLee12138/json-server/embed"
-	"github.com/JsonLee12138/json-server/pkg/core"
-	"github.com/JsonLee12138/json-server/pkg/utils"
+	"github.com/JsonLee12138/jsonix/embed"
+	"github.com/JsonLee12138/jsonix/pkg/core"
+	"github.com/JsonLee12138/jsonix/pkg/utils"
 )
 
 func GenerateController(controllerName, output string, override bool, moduleName string) error {
 	return utils.TryCatchVoid(func() {
 		tmplFile := string(utils.Raise(embed.TemplatesPath.ReadFile("templates/controller.tmpl")))
-		outputPath := fmt.Sprintf("%s/controller/%s_controller.go", output, controllerName)
+		outputPath := fmt.Sprintf("%s/controller/%s.go", output, controllerName)
 		upperName := utils.UpperCamelCase(controllerName)
 		pkgPath := utils.Raise(utils.GetModuleFullPath(moduleName))
 		params := map[string]string{
@@ -83,7 +83,7 @@ func GenerateProvideControllerFn(controllerName string, outPath string) ([]*ast.
 		{
 			Path: &ast.BasicLit{
 				Kind:  token.STRING,
-				Value: "github.com/JsonLee12138/json-server/pkg/utils",
+				Value: "github.com/JsonLee12138/jsonix/pkg/utils",
 			},
 		},
 		{

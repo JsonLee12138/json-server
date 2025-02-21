@@ -1,6 +1,6 @@
 package configs
 
-import "github.com/JsonLee12138/json-server/pkg/utils"
+import "github.com/JsonLee12138/jsonix/pkg/utils"
 
 type SwaggerConfig struct {
 	BasePath string `mapstructure:"base-path" json:"base-path" yaml:"base-path" toml:"base-path"`

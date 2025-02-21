@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/JsonLee12138/json-server/pkg/utils"
+	"github.com/JsonLee12138/jsonix/pkg/utils"
 )
 
 func GenerateFileExistsHandler(output string, tmpl string, params map[string]string, override bool) error {

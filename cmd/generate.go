@@ -1,59 +1,67 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
-	generate2 "github.com/JsonLee12138/json-server/pkg/core/generate"
-	"github.com/JsonLee12138/json-server/pkg/utils"
-	"github.com/spf13/cobra"
 	"os"
+
+	"github.com/JsonLee12138/jsonix/pkg/core/generate"
+	"github.com/JsonLee12138/jsonix/pkg/utils"
+	"github.com/spf13/cobra"
 )
 
-func GenerateSetup(cmd *cobra.Command) {
-	cmd.PersistentFlags().StringP("module", "m", "", "Specify the module name")
-	cmd.PersistentFlags().StringP("service", "s", "", "Specify the service name")
-	cmd.PersistentFlags().StringP("controller", "c", "", "Specify the controller name")
-	cmd.PersistentFlags().StringP("repository", "r", "", "Specify the controller name")
-	cmd.PersistentFlags().StringP("entity", "e", "", "Specify the controller name")
-	cmd.PersistentFlags().BoolP("override", "o", false, "Specify the output directory")
-	cmd.RunE = func(cmd *cobra.Command, args []string) error {
-		moduleName, _ := cmd.Flags().GetString("module")
-		serviceName, _ := cmd.Flags().GetString("service")
-		controllerName, _ := cmd.Flags().GetString("controller")
-		repositoryName, _ := cmd.Flags().GetString("repository")
-		entityName, _ := cmd.Flags().GetString("entity")
-		override, _ := cmd.Flags().GetBool("override")
+func generateRun(cmd *cobra.Command, args []string) error {
+	return utils.TryCatchVoid(func() {
 		currentPath, _ := os.Getwd()
+		moduleName, _ := cmd.Flags().GetString("module")
 		if moduleName != "" {
 			modulePath := fmt.Sprintf("%s/%s", currentPath, moduleName)
-			utils.RaiseVoid(generate2.GenerateModule(moduleName, modulePath))
-			os.Exit(0)
+			utils.RaiseVoid(generate.GenerateModule(moduleName, modulePath))
+			return
 		}
-		if serviceName != "" {
-			utils.RaiseVoid(generate2.GenerateInjectService(serviceName, fmt.Sprintf("%s", currentPath), override, ""))
+		if len(args) == 0 {
+			panic(errors.New("❌ Please specify a service, controller, repository, or entity name using -s or --service, -c or --controller, -r or --repository, or -e or --entity"))
 		}
-		if controllerName != "" {
-			utils.RaiseVoid(generate2.GenerateInjectController(controllerName, fmt.Sprintf("%s", currentPath), override, ""))
+
+		name := args[0]
+
+		serviceFlag, _ := cmd.Flags().GetBool("service")
+		controllerFlag, _ := cmd.Flags().GetBool("controller")
+		repositoryFlag, _ := cmd.Flags().GetBool("repository")
+		entityFlag, _ := cmd.Flags().GetBool("entity")
+		override, _ := cmd.Flags().GetBool("override")
+
+		if serviceFlag {
+			utils.RaiseVoid(generate.GenerateInjectService(name, currentPath, override, ""))
 		}
-		if repositoryName != "" {
-			utils.RaiseVoid(generate2.GenerateInjectRepository(repositoryName, fmt.Sprintf("%s", currentPath), override))
+		if controllerFlag {
+			utils.RaiseVoid(generate.GenerateInjectController(name, currentPath, override, ""))
 		}
-		if entityName != "" {
-			utils.RaiseVoid(generate2.GenerateEntity(entityName, fmt.Sprintf("%s", currentPath), override))
+		if repositoryFlag {
+			utils.RaiseVoid(generate.GenerateInjectRepository(name, currentPath, override))
 		}
-		if moduleName == "" && serviceName == "" && controllerName == "" && repositoryName == "" && entityName == "" {
-			cmd.Println("❌ Please specify a module, service, controller, repository, or entity name using -m or --module, -s or --service, -c or --controller, -r or --repository, or -e or --entity.")
-			os.Exit(0)
+		if entityFlag {
+			utils.RaiseVoid(generate.GenerateEntity(name, currentPath, override))
 		}
-		return nil
-	}
+	}, utils.DefaultErrorHandler)
+}
+
+func generateSetup(cmd *cobra.Command) {
+	cmd.PersistentFlags().StringP("module", "m", "", "Specify the module name")
+	cmd.PersistentFlags().BoolP("service", "s", false, "Specify the service name")
+	cmd.PersistentFlags().BoolP("controller", "c", false, "Specify the controller name")
+	cmd.PersistentFlags().BoolP("repository", "r", false, "Specify the controller name")
+	cmd.PersistentFlags().BoolP("entity", "e", false, "Specify the controller name")
+	cmd.PersistentFlags().BoolP("override", "o", false, "Specify the output directory")
 }
 
 var GenerateCmd = &cobra.Command{
 	Use:   "gen",
-	Short: "A generator for Json Server",
-	Args:  cobra.NoArgs,
+	Short: "A generator for Jsonix",
+	Args:  cobra.ArbitraryArgs,
+	RunE:  generateRun,
 }
 
 func init() {
-	GenerateSetup(GenerateCmd)
+	generateSetup(GenerateCmd)
 }

@@ -1,6 +1,6 @@
 package global
 
-import "github.com/JsonLee12138/json-server/pkg/configs"
+import "github.com/JsonLee12138/jsonix/pkg/configs"
 
 type Configs struct {
 	System  configs.SystemConfig  `mapstructure:"system" json:"system" yaml:"system" toml:"system"`

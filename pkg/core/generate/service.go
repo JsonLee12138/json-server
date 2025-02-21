@@ -5,15 +5,15 @@ import (
 	"go/ast"
 	"go/token"
 
-	"github.com/JsonLee12138/json-server/embed"
-	"github.com/JsonLee12138/json-server/pkg/core"
-	"github.com/JsonLee12138/json-server/pkg/utils"
+	"github.com/JsonLee12138/jsonix/embed"
+	"github.com/JsonLee12138/jsonix/pkg/core"
+	"github.com/JsonLee12138/jsonix/pkg/utils"
 )
 
 func GenerateService(serviceName, output string, override bool, moduleName string) error {
 	return utils.TryCatchVoid(func() {
 		tmplFile := string(utils.Raise(embed.TemplatesPath.ReadFile("templates/service.tmpl")))
-		outputPath := fmt.Sprintf("%s/service/%s_service.go", output, serviceName)
+		outputPath := fmt.Sprintf("%s/service/%s.go", output, serviceName)
 		upperName := utils.UpperCamelCase(serviceName)
 		pkgPath := utils.Raise(utils.GetModuleFullPath(moduleName))
 		params := map[string]string{
@@ -61,7 +61,7 @@ func GenerateProvideServiceFn(serviceName string, outPath string) ([]*ast.Import
 		{
 			Path: &ast.BasicLit{
 				Kind:  token.STRING,
-				Value: "github.com/JsonLee12138/json-server/pkg/utils",
+				Value: "github.com/JsonLee12138/jsonix/pkg/utils",
 			},
 		},
 		{

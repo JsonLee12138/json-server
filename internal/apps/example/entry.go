@@ -1,10 +1,10 @@
 package example
 
 import (
-	"github.com/JsonLee12138/json-server/internal/apps/example/controller"
-	"github.com/JsonLee12138/json-server/internal/apps/example/repository"
-	"github.com/JsonLee12138/json-server/internal/apps/example/service"
-	"github.com/JsonLee12138/json-server/pkg/utils"
+	"github.com/JsonLee12138/jsonix/internal/apps/example/controller"
+	"github.com/JsonLee12138/jsonix/internal/apps/example/repository"
+	"github.com/JsonLee12138/jsonix/internal/apps/example/service"
+	"github.com/JsonLee12138/jsonix/pkg/utils"
 	"go.uber.org/dig"
 )
 

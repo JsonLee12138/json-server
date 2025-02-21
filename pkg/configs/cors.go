@@ -3,7 +3,7 @@ package configs
 import (
 	"strings"
 
-	"github.com/JsonLee12138/json-server/pkg/utils"
+	"github.com/JsonLee12138/jsonix/pkg/utils"
 )
 
 type CorsConfig struct {

@@ -5,16 +5,16 @@ import (
 	"go/ast"
 	"go/token"
 
-	"github.com/JsonLee12138/json-server/embed"
-	"github.com/JsonLee12138/json-server/pkg/core"
-	"github.com/JsonLee12138/json-server/pkg/utils"
+	"github.com/JsonLee12138/jsonix/embed"
+	"github.com/JsonLee12138/jsonix/pkg/core"
+	"github.com/JsonLee12138/jsonix/pkg/utils"
 )
 
 func GenerateRepository(repositoryName, output string, override bool) error {
 	return utils.TryCatchVoid(func() {
 		tmplFile := string(utils.Raise(embed.TemplatesPath.ReadFile("templates/repository.tmpl")))
 		upperName := utils.UpperCamelCase(repositoryName)
-		outputPath := fmt.Sprintf("%s/repository/%s_repository.go", output, repositoryName)
+		outputPath := fmt.Sprintf("%s/repository/%s.go", output, repositoryName)
 		params := map[string]string{
 			"Name": upperName,
 		}
@@ -59,7 +59,7 @@ func GenerateProvideRepositoryFn(repositoryName string, outPath string) ([]*ast.
 		{
 			Path: &ast.BasicLit{
 				Kind:  token.STRING,
-				Value: "github.com/JsonLee12138/json-server/pkg/utils",
+				Value: "github.com/JsonLee12138/jsonix/pkg/utils",
 			},
 		},
 		{

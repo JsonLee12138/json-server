@@ -3,11 +3,11 @@ package configs
 import (
 	"fmt"
 
-	"github.com/JsonLee12138/json-server/pkg/utils"
+	"github.com/JsonLee12138/jsonix/pkg/utils"
 )
 
 type MysqlConfig struct {
-	Loc                       string `mapstructure:"loc" json:"loc" yaml:"loc" toml:"loc"`
+	Loc                       string `mapstructure:" " json:"loc" yaml:"loc" toml:"loc"`
 	Charset                   string `mapstructure:"charset" json:"charset" yaml:"charset" toml:"charset"`
 	ParseTime                 string `mapstructure:"parse-time" json:"parse-time" yaml:"parse-time" toml:"parse-time"`
 	Host                      string `mapstructure:"host" json:"host" yaml:"host" toml:"host"` // 数据库地址

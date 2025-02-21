@@ -32,6 +32,7 @@ func TryCatchVoid(fn func(), errHandler ErrorHandler) error {
 	return tryCatchHandler(fn, errHandler)
 }
 
+// TODO: 需要重构
 func Raise[T any](res T, err error) T {
 	if err != nil {
 		panic(err)
@@ -45,12 +46,14 @@ func RaiseVoid(err error) {
 	}
 }
 
+// TODO: 需要重构
 func RaiseByError(err error, customError error) {
 	if err != nil {
 		panic(customError)
 	}
 }
 
+// TODO: 需要重构
 func RaiseByErrorHandler(err error, errHandler ErrorHandler) {
 	if err != nil {
 		panic(errHandler(err))

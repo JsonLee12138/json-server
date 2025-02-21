@@ -4,7 +4,8 @@ import (
 	"{{ .PkgPath }}/controller"
 	"{{ .PkgPath }}/service"
 	"{{ .PkgPath }}/repository"
-	"github.com/JsonLee12138/json-server/core"
+
+	"github.com/JsonLee12138/jsonix/pkg/utils"
 	"github.com/gofiber/fiber/v2"
 	"go.uber.org/dig"
 )
@@ -33,11 +34,11 @@ func RouterSetup(app *fiber.App, {{ .Name }}Controller *controller.{{ .UpperName
 }
 
 func {{ .UpperName }}ModuleSetup(container *dig.Container) error {
-    return core.TryCatchVoid(func() {
+    return utils.TryCatchVoid(func() {
       scope := container.Scope("{{ .Name }}")
       utils.RaiseVoid(ProvideController(scope))
 			utils.RaiseVoid(ProvideService(scope))
 			utils.RaiseVoid(ProvideRepository(scope))
       utils.RaiseVoid(scope.Invoke(RouterSetup))
-    }, core.DefaultErrorHandler)
+    }, utils.DefaultErrorHandler)
 }

@@ -2,7 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/JsonLee12138/json-server/pkg/core"
+
+	"github.com/JsonLee12138/jsonix/pkg/core"
 	"github.com/spf13/cobra"
 )
 
