@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 )
 
@@ -117,4 +118,49 @@ func TestPanicErrorHandler(t *testing.T) {
 		}
 	}()
 	Throw(errors.New("test panic"))
+}
+
+func TestRaiseTwoSuccess(t *testing.T) {
+	res, res2 := RaiseTwo(1, 2, nil)
+	if res != 1 {
+		t.Errorf("Expected result to be 1, but got %d", res)
+	}
+	if res2 != 2 {
+		t.Errorf("Expected result to be 2, but got %d", res2)
+	}
+}
+
+func TestRaiseTwoPanic(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("Expected panic, but no panic occurred")
+		} else {
+			t.Logf("Caught panic: %v", r)
+		}
+	}()
+	RaiseTwo(1, 2, errors.New("test error"))
+}
+
+func TestRaiseVoidByErrorPanic(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("Expected panic, but no panic occurred")
+		} else {
+			t.Logf("Caught panic: %v", r)
+		}
+	}()
+	RaiseVoidByError(errors.New("test error"), errors.New("custom test error"))
+}
+
+func TestRaiseVoidByErrorHandlerPanic(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("Expected panic, but no panic occurred")
+		} else {
+			t.Logf("Caught panic: %v", r)
+		}
+	}()
+	RaiseVoidByErrorHandler(errors.New("test error"), func(err error) error {
+		return fmt.Errorf("custom test error: %w", err)
+	})
 }

@@ -1,6 +1,8 @@
 package utils
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type ErrorHandler func(error) error
 
@@ -32,7 +34,6 @@ func TryCatchVoid(fn func(), errHandler ErrorHandler) error {
 	return tryCatchHandler(fn, errHandler)
 }
 
-// TODO: 需要重构
 func Raise[T any](res T, err error) T {
 	if err != nil {
 		panic(err)
@@ -40,23 +41,16 @@ func Raise[T any](res T, err error) T {
 	return res
 }
 
-func RaiseVoid(err error) {
+func RaiseTwo[T any, U any](res T, res2 U, err error) (T, U) {
 	if err != nil {
 		panic(err)
 	}
+	return res, res2
 }
 
-// TODO: 需要重构
-func RaiseByError(err error, customError error) {
+func RaiseVoid(err error) {
 	if err != nil {
-		panic(customError)
-	}
-}
-
-// TODO: 需要重构
-func RaiseByErrorHandler(err error, errHandler ErrorHandler) {
-	if err != nil {
-		panic(errHandler(err))
+		panic(err)
 	}
 }
 
