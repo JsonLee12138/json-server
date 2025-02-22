@@ -58,7 +58,6 @@ func initRun(cmd *cobra.Command, args []string) error {
 		default:
 			panic(fmt.Errorf("❌ Invalid template source: %s", result))
 		}
-		exec.Command("jsonix", "migrate").Run()
 		cmd.Println("✅ Renaming project...")
 		cwd, err := os.Getwd()
 		if err != nil {
@@ -113,7 +112,9 @@ func initRun(cmd *cobra.Command, args []string) error {
 				panic(err)
 			}
 		}
-
+		utils.RaiseVoid(exec.Command("rm", "-rf", fmt.Sprintf("%s/.git", name)).Run())
+		cmd.Println("✅ Project initialized successfully!")
+		cmd.Printf("✅ Please run `cd %s && jsonix server` to start the server!\n", name)
 	}, utils.DefaultErrorHandler)
 }
 
