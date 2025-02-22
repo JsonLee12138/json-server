@@ -124,3 +124,11 @@ Below is an overview of the typical project structure:
 ├─ go.mod                      # Go module definition
 └─ go.sum                      # Go module checksum file
 ```
+
+## Feedback & Suggestions
+
+If you encounter any issues or have suggestions for new features during your usage, please feel free to provide your feedback through one of the following methods:
+
+- Submit an Issue on GitHub
+- Send an email to: lijunsong2@gmail.com
+- Personal Discord: json_lee12138
