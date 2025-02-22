@@ -115,3 +115,12 @@ $ jsonix --help
 ├─ go.mod                     # Go 模块文件
 └─ go.sum                     # Go 模块文件
 ```
+
+## 反馈建议
+
+如果你在使用过程中遇到问题或有新功能建议,欢迎通过以下方式反馈:
+
+- 在 GitHub 提交 Issue
+- 发送邮件至: lijunsong2@gmail.com
+- 个人微信: Json_Lee12138
+- 个人 QQ: 2622336659
