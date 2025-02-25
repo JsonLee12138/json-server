@@ -25,6 +25,16 @@ const (
 	sourcePackage = "jsonix-kit"
 )
 
+func clearGit(name string) error {
+	cmd := exec.Command("git", "remote", "rm", "origin")
+	cwd, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("❌ Error getting current working directory: %s", err)
+	}
+	cmd.Dir = fmt.Sprintf("%s/%s", cwd, name)
+	return cmd.Run()
+}
+
 func initRun(cmd *cobra.Command, args []string) error {
 	return utils.TryCatchVoid(func() {
 		namePrompt := promptui.Prompt{
@@ -112,7 +122,8 @@ func initRun(cmd *cobra.Command, args []string) error {
 				panic(err)
 			}
 		}
-		utils.RaiseVoid(exec.Command("rm", "-rf", fmt.Sprintf("%s/.git", name)).Run())
+		// utils.RaiseVoid(exec.Command("cd", name, "&&", "git", "remote", "rm", "origin").Run())
+		clearGit(name)
 		cmd.Println("✅ Project initialized successfully!")
 		cmd.Printf("✅ Please run `cd %s && jsonix server` to start the server!\n", name)
 	}, utils.DefaultErrorHandler)
