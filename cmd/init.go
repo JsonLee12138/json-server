@@ -122,8 +122,7 @@ func initRun(cmd *cobra.Command, args []string) error {
 				panic(err)
 			}
 		}
-		// utils.RaiseVoid(exec.Command("cd", name, "&&", "git", "remote", "rm", "origin").Run())
-		clearGit(name)
+		utils.RaiseVoid(clearGit(name))
 		cmd.Println("✅ Project initialized successfully!")
 		cmd.Printf("✅ Please run `cd %s && jsonix server` to start the server!\n", name)
 	}, utils.DefaultErrorHandler)
