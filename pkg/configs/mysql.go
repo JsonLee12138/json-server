@@ -2,6 +2,7 @@ package configs
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/JsonLee12138/jsonix/pkg/utils"
 )
@@ -43,5 +44,6 @@ func (c *MysqlConfig) DSN() string {
 	if utils.IsEmpty(c.MaxOpenConns) || c.MaxOpenConns == 0 {
 		c.MaxIdleConns = 100
 	}
-	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=%s&loc=%s&%s", c.Username, c.Password, c.Host, c.Port, c.DBName, charset, parseTime, loc, c.Config)
+	res := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=%s&loc=%s&%s", c.Username, c.Password, c.Host, c.Port, c.DBName, charset, parseTime, loc, c.Config)
+	return strings.Trim(res, "&")
 }

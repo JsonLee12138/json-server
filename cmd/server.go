@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -35,19 +34,35 @@ func serverRun(cmd *cobra.Command, args []string) error {
 		showPort, _ := cmd.Flags().GetString("show")
 		killPort, _ := cmd.Flags().GetString("kill")
 		if showPort != "" {
-			pid := utils.Raise(utils.FindPIDByPort(showPort))
+			//pid := utils.Raise(utils.FindPIDByPort(showPort))
+			pid, err := utils.FindPIDByPort(showPort)
+			if err != nil {
+				cmd.Println(err.Error())
+				return
+			}
 			if pid == "" {
-				panic(errors.New("No process found on port"))
+				//panic(fmt.Errorf("No process found on port: %s", showPort))
+				cmd.Println("No process found on port:", showPort)
 			}
 			cmd.Println("Process running on port", showPort, "is", pid)
 			return
 		}
 		if killPort != "" {
-			pid := utils.Raise(utils.FindPIDByPort(killPort))
-			if pid == "" {
-				panic(errors.New("No process found on port"))
+			//pid := utils.Raise(utils.FindPIDByPort(killPort))
+			pid, err := utils.FindPIDByPort(killPort)
+			if err != nil {
+				cmd.Println(err.Error())
+				return
 			}
-			utils.RaiseVoid(utils.KillProcess(pid))
+			if pid == "" {
+				//panic(errors.New("No process found on port"))
+				cmd.Println("No process found on port:", killPort)
+			}
+			//utils.RaiseVoid(utils.KillProcess(pid))
+			err = utils.KillProcess(pid)
+			if err != nil {
+				cmd.Println(err.Error())
+			}
 			cmd.Println("Process killed on port", killPort)
 			return
 		}

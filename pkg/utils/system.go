@@ -10,6 +10,9 @@ func FindPIDByPort(port string) (string, error) {
 	cmd := exec.Command("lsof", "-t", "-i", ":"+port)
 	output, err := cmd.Output()
 	if err != nil {
+		if err.Error() == "exit status 1" {
+			return "", fmt.Errorf("No process found on port: %s", port)
+		}
 		return "", fmt.Errorf("error getting process info: %v", err)
 	}
 	if len(output) == 0 {
